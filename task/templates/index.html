@@ -1,0 +1,143 @@
+{% extends 'template_html/index_base.html' %}
+
+{% block css %}
+    <style>
+        [v-cloak] {
+            display: none;
+        }
+    </style>
+{% endblock %}
+
+{% block header %}
+    <ol class="breadcrumb navbar-breadcrumb">
+        <li class="active">图表信息</li>
+    </ol>
+{% endblock %}
+{% block conter %}
+
+    <div class="row">
+        <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+            <a href="#">
+                <div class="card red summary-inline">
+                    <div class="card-body">
+                        <i class="icon fa fa-inbox fa-4x"></i>
+                        <div class="content">
+                            <div class="title">50</div>
+                            <div class="sub-title">New Mails</div>
+                        </div>
+                        <div class="clear-both"></div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+            <a href="#">
+                <div class="card yellow summary-inline">
+                    <div class="card-body">
+                        <i class="icon fa fa-comments fa-4x"></i>
+                        <div class="content">
+                            <div class="title">23</div>
+                            <div class="sub-title">New Message</div>
+                        </div>
+                        <div class="clear-both"></div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+            <a href="#">
+                <div class="card green summary-inline">
+                    <div class="card-body">
+                        <i class="icon fa fa-tags fa-4x"></i>
+                        <div class="content">
+                            <div class="title">280</div>
+                            <div class="sub-title">Product View</div>
+                        </div>
+                        <div class="clear-both"></div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+            <a href="#">
+                <div class="card blue summary-inline">
+                    <div class="card-body">
+                        <i class="icon fa fa-share-alt fa-4x"></i>
+                        <div class="content">
+                            <div class="title">16</div>
+                            <div class="sub-title">Share</div>
+                        </div>
+                        <div class="clear-both"></div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+    <div id="check">
+    <el-row :gutter="12">
+        <el-col :span="4" v-for="(k,i) in for_list" :key="i">
+            <el-tooltip class="item" effect="dark" :content="k.time" placement="top">
+                <el-card shadow="hover">
+                    <i class="el-icon-success" v-cloak v-if="k.status" style="color: #67C23A"></i>
+                    <i class="el-icon-error" v-cloak v-else style="color: #F56C6C"></i>
+                    <span v-text="k.name"></span>
+                </el-card>
+            </el-tooltip>
+        </el-col>
+    </el-row>
+
+
+
+{% endblock %}
+
+{% block js %}
+    <script>
+        function get_ajax(ths) {
+            console.log("ok");
+            axios.get("/monitor/index/", {
+                params: {
+                    status: "get_info"
+                }
+            }).then(function (resp) {
+                console.log(resp.data.data);
+                ths.for_list = resp.data.data;
+                for (let st in resp.data.data) {
+                    console.log(resp.data.data[st].status);
+                    if (!resp.data.data[st].status) {
+                        console.log(1111);
+                        setTimeout(function () {
+                            ths.$notify.error({
+                                title: '错误信息',
+                                message: resp.data.data[st].name + "上报数据已超时.",
+                                position: 'bottom-right'
+                            })
+                        }, 1000);
+                    }
+                }
+            }).catch(function (resp) {
+                console.log("请求失败")
+            })
+        }
+        $("#active1").addClass("active");
+        new Vue({
+            el: "#check",
+            data: {
+                user: "北京北汽",
+                for_list: []
+            },
+            created: function (row) {
+                get_ajax(this)
+            },
+            methods: {
+                open8() {
+                    this.$notify({
+                        title: '自定义位置',
+                        message: '右下角弹出的消息',
+                        position: 'bottom-right'
+                    });
+                },
+
+            },
+        })
+    </script>
+{% endblock %}

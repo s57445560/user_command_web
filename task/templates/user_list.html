@@ -1,0 +1,293 @@
+{% extends 'template_html/index_base.html' %}
+
+{% block css %}
+    <style>
+        [v-cloak] {
+            display: none;
+        }
+    </style>
+{% endblock %}
+
+{% block header %}
+    <ol class="breadcrumb navbar-breadcrumb">
+        <li>用户管理</li>
+        <li class="active">用户查看与修改</li>
+    </ol>
+{% endblock %}
+{% block conter %}
+    <div id="yang" class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <div class="title">用户列表</div>
+                    </div>
+                </div>
+                <div class="card-body" v-loading="loading"
+                     style="min-height: 550px;"
+                     element-loading-text="拼命加载中"
+                     element-loading-spinner="el-icon-loading"
+                     element-loading-background="rgba(0, 0, 0, 0.8)">
+                    <div class="col-md-12">
+                        <el-table
+                                :data="data_page"
+                                border
+                                style="width: 100%">
+                            <el-table-column
+                                    prop="id"
+                                    label="序号"
+                                    width="180">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="name"
+                                    label="姓名">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="username"
+                                    label="系统账号"
+                                    width="180">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="status"
+                                    label="状态">
+                                <template slot-scope="scope">
+                                    <el-tag
+                                            :type="scope.row.status === '可用' ? 'success' : 'danger'"
+                                            disable-transitions v-text="scope.row.status"></el-tag>
+                                </template>
+                            </el-table-column>
+                            <el-table-column
+                                    prop="push_status"
+                                    label="状态">
+                                <template slot-scope="scope">
+                                    <el-tag
+                                            :type="scope.row.push_status === '已推送' ? 'success' : 'danger'"
+                                            disable-transitions v-text="scope.row.push_status"></el-tag>
+                                </template>
+                            </el-table-column>
+                            <el-table-column
+                                    fixed="right"
+                                    label="操作"
+                                    width="170">
+                                <template slot-scope="scope">
+                                    <el-button size="mini" type="success"
+                                               @click="edit_data(scope.row)">编辑
+                                    </el-button>
+                                    <el-button @click="del_data(scope.row)" size="mini" type="danger">删除</el-button>
+                                </template>
+                            </el-table-column>
+                        </el-table>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="block container" style="margin-top: 50px;">
+                            <el-pagination
+                                    @size-change="handleSizeChange"
+                                    @current-change="handleCurrentChange"
+                                    background
+                                    layout="prev, pager, next,jumper,total,sizes"
+                                    prev-text="上一页"
+                                    next-text="下一页"
+                                    popper-class="每页显示"
+                                    :current-page="list_data.currentPage"
+                                    :total="total"
+                                    :page-sizes="[10, 20, 50, 100]"
+                                    :page-size="list_data.handlesize">
+                            </el-pagination>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <el-dialog title="修改用户信息"
+                           :visible.sync="editStatus"
+                           width="50%">
+                    <el-row>
+                        <el-col :span="12">
+                            <el-form :model="user_edit">
+                                <el-form-item label="姓名(中文)" :label-width="formLabelWidth">
+                                    <el-input v-model="user_edit.name" auto-complete="off"
+                                              label-width="100px;"></el-input>
+                                </el-form-item>
+                                <el-form-item label="系统账号名" :label-width="formLabelWidth">
+                                    <el-input v-model="user_edit.username" auto-complete="off"
+                                              label-width="100px;"></el-input>
+                                </el-form-item>
+                                <el-form-item label="密码" :label-width="formLabelWidth">
+                                    <el-input v-model="user_edit.passwd" auto-complete="off"></el-input>
+                                </el-form-item>
+                                <el-col :offset="6">
+                                    <el-form-item>
+                                        <div class="checkbox3 checkbox-success checkbox-inline checkbox-check checkbox-round  checkbox-light">
+                                            <input type="checkbox" id="checkbox-fa-light-2" checked=""
+                                                   v-model="user_edit.status">
+                                            <label for="checkbox-fa-light-2" v-cloak>是否启用</label>
+                                        </div>
+                                    </el-form-item>
+                                </el-col>
+                                <el-col :offset="5">
+                                    <el-form-item>
+                                        <p v-text="error_message" style="color: #F56C6C"></p>
+                                    </el-form-item>
+                                </el-col>
+                            </el-form>
+                        </el-col>
+                    </el-row>
+                    <span slot="footer" class="dialog-footer">
+                    <el-button @click="editStatus = false" v-cloak>取 消</el-button>
+                    <el-button type="primary" @click="submit_edit" v-cloak>确 定</el-button>
+                  </span>
+                </el-dialog>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+
+{% block js %}
+    <script>
+        $("#active2").addClass("active");
+        function page_ajax(ths) {
+            console.log("ok");
+            axios.post("/monitor/user_list/", ths.list_data, {
+                transformRequest: [
+                    function (data) {
+                        let params = '';
+                        for (let index in data) {
+                            params += index + "=" + data[index] + "&"
+                        }
+                        console.log(params);
+                        return params
+                    }
+                ]
+            }).then(function (resp) {
+                console.log(resp.data.data);
+                ths.data_page = resp.data.data;
+                ths.total = resp.data.total;
+                ths.loading = false;
+                console.log(ths.loading)
+            }).catch(function (resp) {
+                console.log("请求失败")
+            })
+        }
+        var yang = new Vue({
+            el: "#yang",
+            data: {
+                data_page: [],
+                user_edit: {},
+                list_data: {currentPage: 1, handlesize: 10},
+                total: 110,
+                loading: true,
+                editStatus: false,
+                error_message: "",
+                formLabelWidth: "100px"
+            },
+            methods: {
+                handleSizeChange(val) {
+                    this.list_data.handlesize = val;
+                    this.loading = true;
+                    console.log(`每页 ${val} 条` + this.currentPage);
+                    page_ajax(this)
+
+                },
+                handleCurrentChange(val) {
+                    this.loading = true;
+                    this.list_data.currentPage = val;
+                    console.log(`当前页: ${val} ` + this.handlesize);
+                    page_ajax(this);
+                },
+
+                edit_data(row) {
+                    this.editStatus = true;
+                    this.user_edit.name = row.name;
+                    this.user_edit.username = row.username;
+                    this.user_edit.passwd = row.passwd;
+                    this.user_edit.id = row.id;
+                    if (row.status === "停用") {
+                        yang.user_edit.status = false
+                    } else {
+                        yang.user_edit.status = true
+                    }
+                    console.log(yang.user_edit);
+                },
+                submit_edit(){
+                    console.log();
+                    axios.post("/monitor/user/edit/", this.user_edit, {
+                        transformRequest: [
+                            function (data) {
+                                let params = '';
+                                for (let index in data) {
+                                    params += index + "=" + data[index] + "&"
+                                }
+                                console.log(params);
+                                return params
+                            }
+                        ]
+                    }).then(function (resp) {
+                        console.log(resp.data);
+                        this.user = {"status": true};
+                        if (resp.data.message === "") {
+                            yang.editStatus = false;
+                            console.log(yang.data_page[yang.user_edit.id - 1]);
+                            yang.data_page.forEach(function (v, i) {
+                                if (v.id === yang.user_edit.id) {
+                                    yang.data_page[i].status = resp.data.status;
+                                    yang.data_page[i].passwd = resp.data.passwd;
+                                    yang.data_page[i].push_status = resp.data.push_status;
+                                    return;
+                                }
+                            });
+                            console.log(yang.data_page[yang.user_edit.id - 1]);
+                            console.log("ok");
+                        } else {
+                            yang.error_message = resp.data.message;
+                            console.log("error");
+                        }
+                    }).catch(function (resp) {
+                        console.log("请求失败")
+                    })
+                },
+                del_data(row){
+                    let dic = {};
+                    this.$confirm('此操作将删除该用户, 是否继续?', '提示', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).then(() => {
+                        dic["id"] = row.id;
+                        axios.post("/monitor/user/del/", dic, {
+                            transformRequest: [
+                                function (data) {
+                                    let params = '';
+                                    for (let index in data) {
+                                        params += index + "=" + data[index] + "&"
+                                    }
+                                    console.log(params);
+                                    return params
+                                }
+                            ]
+                        })
+                    }).then(function (resp) {
+                        console.log(dic.id - 1);
+                        console.log(yang.data_page);
+                        yang.data_page.forEach(function (v, i) {
+                            if (v.id === dic.id) {
+                                yang.data_page.splice(i, 1);
+                                return;
+                            }
+                        });
+                        console.log("删除成功")
+                    })
+                },
+                user_status () {
+                    console.log("aaaaa");
+                    this.user_edit.status = false
+                }
+            },
+            created: function (row) {
+                page_ajax(this)
+            }
+        });
+
+    </script>
+{% endblock %}

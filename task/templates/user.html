@@ -1,0 +1,129 @@
+{% extends 'template_html/index_base.html' %}
+
+{% block css %}{% endblock %}
+
+{% block header %}
+    <ol class="breadcrumb navbar-breadcrumb">
+        <li>用户管理</li>
+        <li class="active">用户添加</li>
+    </ol>
+{% endblock %}
+{% block conter %}
+    <div class="row" id="yang">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <div class="title">创建新用户</div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="col-md-7" style="margin-top: 6px;">
+                        <form class="form-horizontal">
+                            <div class="form-group">
+                                <label for="inputEmail3" class="col-sm-2 control-label">姓名(中文)</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" id="inputEmail3" placeholder="用户姓名"
+                                           v-model="user.name">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputEmail3" class="col-sm-2 control-label">系统账号名</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" id="inputEmail3" placeholder="系统用户名"
+                                           v-model="user.username">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputPassword3" class="col-sm-2 control-label">密码</label>
+                                <div class="col-sm-10">
+                                    <input type="password" class="form-control" id="inputPassword3" placeholder="系统密码"
+                                           v-model="user.passwd">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-sm-offset-2 col-sm-10">
+                                    <div class="checkbox3 checkbox-success checkbox-inline checkbox-check checkbox-round  checkbox-light">
+                                        <input type="checkbox" id="checkbox-fa-light-2" checked=""
+                                               v-model="user.status">
+                                        <label for="checkbox-fa-light-2">
+                                            是否启用
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-sm-offset-2 col-sm-10">
+                                    <button type="button" class="btn btn-info" @click="submit">提交</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+
+{% block js %}
+    <script>
+        $("#active2").addClass("active");
+        var sunyang = new Vue({
+            el: "#yang",
+            data: {
+                user: {"status": true},
+                message: "",
+                status_ok: false,
+                status_err: false
+            },
+            methods: {
+                submit: function () {
+                    console.log(this.user);
+                    axios.post("/monitor/user/", this.user, {
+                        transformRequest: [
+                            function (data) {
+                                let params = '';
+                                for (let index in data) {
+                                    params += index + "=" + data[index] + "&"
+                                }
+                                console.log(params);
+                                return params
+                            }
+                        ]
+                    }).then(function (resp) {
+                        console.log(resp.data.message);
+                        this.user = {"status": true};
+                        if (resp.data.message === "") {
+                            console.log("ok");
+                            sunyang.user = {"status": true};
+                            sunyang.$notify.success({
+                                title: '成功',
+                                message: "恭喜 用户创建成功",
+                                offset: 100
+                            });
+                            sunyang.status_ok = true;
+                        } else {
+                            console.log("error");
+                            sunyang.$notify.error({
+                                title: '失败',
+                                message: "失败原因: " + resp.data.message,
+                                offset: 100
+                            });
+                            console.log(sunyang.message);
+                        }
+                    }).catch(function (resp) {
+                        console.log("请求失败")
+                    })
+                },
+                ok_method: function () {
+                    this.status_ok = false;
+                },
+                err_method: function () {
+                    this.status_err = false;
+                }
+            }
+        })
+    </script>
+{% endblock %}
