@@ -7,7 +7,7 @@ QY_NAME = u"北京北汽"
 
 URL = "http://192.168.6.125:8008"
 
-APPID = "lgxy@smc_monitor_api."
+APPID = "..."
 
 # 循环间隔
 INTERVAL = 10

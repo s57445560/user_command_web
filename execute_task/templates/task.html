@@ -1,0 +1,299 @@
+{% extends 'template_html/index_base.html' %}
+
+{% block css %}{% endblock %}
+
+{% block header %}
+    <ol class="breadcrumb navbar-breadcrumb">
+        <li>主机托管平台</li>
+        <li class="active">任务查看</li>
+    </ol>
+{% endblock %}
+{% block conter %}
+    <div id="yang" class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <div class="title">用户列表</div>
+                    </div>
+                </div>
+                <div class="card-body" v-loading="loading"
+                     style="min-height: 550px;"
+                     element-loading-text="拼命加载中"
+                     element-loading-spinner="el-icon-loading"
+                     element-loading-background="rgba(0, 0, 0, 0.8)">
+                    <div class="col-md-12">
+                        <el-table
+                                :data="data_page"
+                                border
+                                style="width: 100%">
+                            <el-table-column
+                                    prop="id"
+                                    label="id"
+                                    width="60">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="task_group"
+                                    label="执行地点"
+                                    width="200">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="cmd"
+                                    label="执行指令"
+                                    width="150">
+                                <template slot-scope="scope">
+                                    <el-tag
+                                            :type="scope.row.color"
+                                            disable-transitions v-text="scope.row.cmd"></el-tag>
+                                </template>
+                            </el-table-column>
+                            <el-table-column
+                                    prop="time"
+                                    label="执行时间"
+                                    width="180">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="all"
+                                    label="执行主机数"
+                                    width="100">
+                                <template slot-scope="scope">
+                                    <el-tag
+                                            type="primary"
+                                            disable-transitions v-text="scope.row.all"></el-tag>
+                                </template>
+                            </el-table-column>
+                            <el-table-column
+                                    prop="ok"
+                                    label="执行成功数"
+                                    width="100">
+                                <template slot-scope="scope">
+                                    <el-tag
+                                            type="success"
+                                            disable-transitions v-text="scope.row.ok"></el-tag>
+                                </template>
+                            </el-table-column>
+                            <el-table-column
+                                    prop="err"
+                                    label="执行失败数"
+                                    width="100">
+                                <template slot-scope="scope">
+                                    <el-tag
+                                            type="danger"
+                                            disable-transitions v-text="scope.row.err"></el-tag>
+                                </template>
+                            </el-table-column>
+                            <el-table-column
+                                    prop="user"
+                                    label="系统账号"
+                            >
+                            </el-table-column>
+                            <el-table-column
+                                    fixed="right"
+                                    label="操作"
+                                    width="150"
+                            >
+                                <template slot-scope="scope">
+                                    <el-button size="mini" type="success"
+                                               @click="select_all_data(scope.row)">查看
+                                    </el-button>
+                                    <el-button size="mini" type="danger"
+                                               @click="select_error_data(scope.row)">错误
+                                    </el-button>
+                                </template>
+                            </el-table-column>
+                        </el-table>
+                    </div>
+                    <div class="col-md-12" style="margin-bottom: 40px;">
+                        <div class="block container" style="margin-top: 50px;">
+                            <el-pagination
+                                    @size-change="handleSizeChange"
+                                    @current-change="handleCurrentChange"
+                                    background
+                                    layout="prev, pager, next,jumper,total,sizes"
+                                    prev-text="上一页"
+                                    next-text="下一页"
+                                    popper-class="每页显示"
+                                    :current-page="list_data.currentPage"
+                                    :total="total"
+                                    :page-sizes="[10, 20, 50, 100]"
+                                    :page-size="list_data.handlesize">
+                            </el-pagination>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div>
+            <el-dialog title="执行结果查看"
+                       :visible.sync="editStatus"
+                       width="80%">
+                <el-row>
+                    <el-col :span="22" :offset="1" v-loading="loading2"
+                            element-loading-text="拼命加载中">
+                        <el-collapse v-model="activeNames">
+                            <el-collapse-item v-for="(value,key) in result_list" :title="value.name" :key="key">
+                                <div v-for="(v,k) in value.list" :key="k">
+                                    <el-col v-for="(v1,k1) in v" :key="k1">
+                                        <el-col :span="4"><el-tag v-text="k1" :key="k1"></el-tag></el-col>
+                                        <el-col :span="15"><pre v-text="v1" :key="k1"></pre></el-col>
+
+                                    </el-col>
+                                </div>
+
+                            </el-collapse-item>
+                        </el-collapse>
+                    </el-col>
+                </el-row>
+                <span slot="footer" class="dialog-footer">
+                    <el-button @click="editStatus = false" v-cloak>取 消</el-button>
+                  </span>
+            </el-dialog>
+        </div>
+
+        <div>
+            <el-dialog title="错误结果查看"
+                       :visible.sync="editStatus1"
+                       width="80%">
+                <el-row v-if="result_error_list.length !== 0 ? true : false">
+                    <el-col :span="22" :offset="1" v-loading="loading3"
+                            element-loading-text="拼命加载中">
+                        <el-collapse v-model="activeNames">
+                            <el-collapse-item v-for="(value,key) in result_error_list" :title="value.name" :key="key">
+                                <div v-for="(v,k) in value.list" :key="k">
+                                    <el-col v-for="(v1,k1) in v" :key="k1">
+                                        <el-col :span="4"><el-tag v-text="k1" :key="k1"></el-tag></el-col>
+                                        <el-col :span="15"><pre v-text="v1" :key="k1"></pre></el-col>
+                                    </el-col>
+                                </div>
+                            </el-collapse-item>
+                        </el-collapse>
+                    </el-col>
+                </el-row>
+                <el-row v-else>
+                    <h1 align="center">无异常</h1>
+                </el-row>
+                <span slot="footer" class="dialog-footer">
+                    <el-button @click="editStatus1 = false" v-cloak>取 消</el-button>
+                  </span>
+            </el-dialog>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block js %}
+    <script>
+        $("#active3").addClass("active");
+        function page_ajax(ths) {
+            console.log("ok");
+            axios.post("/monitor/task_info/", ths.list_data, {
+                transformRequest: [
+                    function (data) {
+                        let params = '';
+                        for (let index in data) {
+                            params += index + "=" + data[index] + "&"
+                        }
+                        return params
+                    }
+                ]
+            }).then(function (resp) {
+                ths.data_page = resp.data.data;
+                ths.total = resp.data.total;
+                ths.loading = false;
+            }).catch(function (resp) {
+                console.log("请求失败")
+            })
+        }
+        function get_ajax(ths) {
+            axios.get("/monitor/task_info/", {
+                params: ths.list_data
+            }).then(function (resp) {
+                ths.data_page = resp.data.data;
+                ths.total = resp.data.total;
+                ths.loading = false;
+            }).catch(function (resp) {
+                console.log("请求失败")
+            })
+        }
+        var yang = new Vue({
+            el: "#yang",
+            data: {
+                data_page: [],
+                user_edit: {},
+                list_data: {currentPage: 1, handlesize: 10},
+                total: 110,
+                loading: true,
+                editStatus: false,
+                editStatus1: false,
+                error_message: "",
+                formLabelWidth: "100px",
+                activeNames: [],
+                loading2: false,
+                loading3: false,
+                result_list: [],
+                result_error_list:[]
+            },
+            methods: {
+                handleSizeChange(val) {
+                    this.list_data.handlesize = val;
+                    this.loading = true;
+                    console.log(`每页 ${val} 条` + this.currentPage);
+                    get_ajax(this)
+
+                },
+                handleCurrentChange(val) {
+                    this.loading = true;
+                    this.list_data.currentPage = val;
+                    console.log(`当前页: ${val} ` + this.handlesize);
+                    get_ajax(this);
+                },
+                select_all_data(row){
+                    this.editStatus = true;
+                    this.loading2 = true;
+                    axios.post("/monitor/task_info/", {"status":"GET_OK","id":row.id}, {
+                        transformRequest: [
+                            function (data) {
+                                let params = '';
+                                for (let index in data) {
+                                    params += index + "=" + data[index] + "&"
+                                }
+                                console.log(params);
+                                return params
+                            }
+                        ]
+                    }).then(function (resp) {
+                        yang.result_list = resp.data.data;
+                        yang.loading2 = false;
+                    }).catch(function (resp) {
+                        console.log("请求失败")
+                    })
+                },
+
+                select_error_data(row){
+                    this.editStatus1 = true;
+                    this.loading3 = true;
+                    axios.post("/monitor/task_info/", {"status":"GET_ERROR","id":row.id}, {
+                        transformRequest: [
+                            function (data) {
+                                let params = '';
+                                for (let index in data) {
+                                    params += index + "=" + data[index] + "&"
+                                }
+                                console.log(params);
+                                return params
+                            }
+                        ]
+                    }).then(function (resp) {
+                        yang.result_error_list = resp.data.data;
+                        yang.loading3 = false;
+                    }).catch(function (resp) {
+                        console.log("请求失败")
+                    })
+                }
+            },
+            created: function (row) {
+                get_ajax(this);
+            }
+        });
+    </script>
+{% endblock %}

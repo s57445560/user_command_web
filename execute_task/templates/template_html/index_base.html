@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>DevOps web</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Fonts -->
+    {#    <link href='http://fonts.googleapis.com/css?family=Roboto+Condensed:300,400' rel='stylesheet' type='text/css'>#}
+    {#    <link href='http://fonts.googleapis.com/css?family=Lato:300,400,700,900' rel='stylesheet' type='text/css'>#}
+    <!-- CSS Libs -->
+    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/font-awesome.min.css">
+    {#    <link rel="stylesheet" type="text/css" href="/static/css/animate.min.css">#}
+    {#    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap-switch.min.css">#}
+    <link rel="stylesheet" type="text/css" href="/static/css/checkbox3.min.css">
+    {#    <link rel="stylesheet" type="text/css" href="/static/css/jquery.dataTables.min.css">#}
+    <link rel="stylesheet" type="text/css" href="/static/css/dataTables.bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/select2.min.css">
+    <!-- CSS App -->
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/flat-blue.css">
+    {#    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">#}
+    <link rel="stylesheet" type="text/css" href="/static/vue/animate.css">
+    <link rel="stylesheet" type="text/css" href="/static/vue/index.css">
+    {% block style %} {% endblock %}
+</head>
+
+<body class="flat-blue">
+<div class="app-container">
+    <div class="row content-container">
+        <nav class="navbar navbar-default navbar-fixed-top navbar-top">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-expand-toggle">
+                        <i class="fa fa-bars icon"></i>
+                    </button>
+                    {% block header %}
+
+                    {% endblock %}
+                    <button type="button" class="navbar-right-expand-toggle pull-right visible-xs">
+                        <i class="fa fa-th icon"></i>
+                    </button>
+                </div>
+                <ul class="nav navbar-nav navbar-right">
+                    <button type="button" class="navbar-right-expand-toggle pull-right visible-xs">
+                        <i class="fa fa-times icon"></i>
+                    </button>
+                    <li class="dropdown profile" id="get_user">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"
+                           v-html="userhtml"></a>
+                        <ul class="dropdown-menu animated fadeInDown">
+                            <li class="profile-img">
+                                <img src="/static/img/profile/picjumbo.com_HNCK4153_resize.jpg" class="profile-img">
+                            </li>
+                            <li>
+                                <div class="profile-info">
+                                    <h4 class="username" v-text="user"></h4>
+                                    <div class="btn-group margin-bottom-2x" role="group">
+                                        <button type="button" class="btn btn-default"><i class="fa fa-user"></i> 配置
+                                        </button>
+                                        <a href="/monitor/logout/"><button type="button" class="btn btn-default">
+                                            <i class="fa fa-sign-out"></i> 登出</button></a>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <div class="side-menu sidebar-inverse">
+            <nav class="navbar navbar-default" role="navigation">
+                <div class="side-menu-container">
+                    <div class="navbar-header">
+                        <a class="navbar-brand" href="#">
+                            <div class="icon fa fa-paper-plane"></div>
+                            <div class="title">平台任务下发系统</div>
+                        </a>
+                        <button type="button" class="navbar-expand-toggle pull-right visible-xs">
+                            <i class="fa fa-times icon"></i>
+                        </button>
+                    </div>
+                    <ul class="nav navbar-nav">
+                        <li id="active1">
+                            <a href="/monitor/index/">
+                                <span class="icon fa fa-tachometer"></span><span class="title">图表信息</span>
+                            </a>
+                        </li>
+
+                        <li class="panel panel-default dropdown" id="active2">
+                            <a data-toggle="collapse" href="#dropdown-table">
+                                <span class="icon fa fa-table"></span><span class="title">用户管理</span>
+                            </a>
+                            <!-- Dropdown level 1 -->
+                            <div id="dropdown-table" class="panel-collapse collapse">
+                                <div class="panel-body">
+                                    <ul class="nav navbar-nav">
+                                        <li><a href="/monitor/user/">用户添加</a>
+                                        </li>
+                                        <li><a href="/monitor/user_list/">用户查看与修改</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </li>
+
+                        <li class="panel panel-default dropdown" id="active3">
+                            <a data-toggle="collapse" href="#dropdown-element" aria-expanded="true" class>
+                                <span class="icon fa fa-desktop"></span><span class="title">企业托管平台</span>
+                            </a>
+                            <!-- Dropdown level 1 -->
+                            <div id="dropdown-element" class="panel-collapse collapse">
+                                <div class="panel-body">
+                                    <ul class="nav navbar-nav">
+                                        <li><a href="/monitor/command/">任务下发</a>
+                                        </li>
+                                        <li><a href="/monitor/task_info/">任务查看</a>
+                                        </li>
+                                        <li><a href="/monitor/host/">主机信息</a>
+                                        </li>
+                                        <li><a href="ui-kits/card.html">预留</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </li>
+
+                        <li class="panel panel-default dropdown">
+                            <a data-toggle="collapse" href="#dropdown-form">
+                                <span class="icon fa fa-file-text-o"></span><span class="title">扩展功能</span>
+                            </a>
+                            <!-- Dropdown level 1 -->
+                            <div id="dropdown-form" class="panel-collapse collapse">
+                                <div class="panel-body">
+                                    <ul class="nav navbar-nav">
+                                        <li><a href="#">预留</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <!-- /.navbar-collapse -->
+            </nav>
+        </div>
+        <!-- Main Content -->
+        <div class="container-fluid">
+            <div class="side-body padding-top">
+                {% block conter %} {% endblock %}
+            </div>
+        </div>
+    </div>
+    <footer class="app-footer">
+        <div class="wrapper">
+            <span>© 2018 author Sun yang</span>
+        </div>
+    </footer>
+</div>
+
+<!-- Javascript Libs -->
+<script type="text/javascript" src="/static/js/jquery.min.js"></script>
+<script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
+{#            <script type="text/javascript" src="/static/js/Chart.min.js"></script>#}
+<script type="text/javascript" src="/static/js/bootstrap-switch.min.js"></script>
+<script type="text/javascript" src="/static/js/jquery.matchHeight-min.js"></script>
+<script type="text/javascript" src="/static/js/jquery.dataTables.min.js"></script>
+{#            <script type="text/javascript" src="/static/js/dataTables.bootstrap.min.js"></script>#}
+<script type="text/javascript" src="/static/js/select2.full.min.js"></script>
+{#            <script type="text/javascript" src="/static/js/ace/ace.js"></script>#}
+{#            <script type="text/javascript" src="/static/js/ace/mode-html.js"></script>#}
+{#            <script type="text/javascript" src="/static/js/ace/theme-github.js"></script>#}
+<!-- Javascript -->
+<script type="text/javascript" src="/static/js/app.js"></script>
+<script type="text/javascript" src="/static/vue/vue.js"></script>
+<script type="text/javascript" src="/static/vue/axios.min.js"></script>
+<script type="text/javascript" src="/static/vue/index.js"></script>
+{#            <script type="text/javascript" src="/static/js/index.js"></script>#}
+<script>
+    var get_user = new Vue({
+        el: "#get_user",
+        data: {
+            userhtml: '',
+            user: ''
+        },
+        mounted: function () {
+            axios.get("/monitor/index/", {
+                params: {
+                    getuser: true
+                }
+            }).then(function (resp) {
+                get_user.userhtml = resp.data.user + ' <span class="caret"></span>';
+                get_user.user = resp.data.user
+            })
+        }
+    })
+</script>
+{% block js %} {% endblock %}
+</body>
+
+</html>

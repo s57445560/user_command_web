@@ -1,0 +1,188 @@
+{% extends 'template_html/index_base.html' %}
+
+{% block css %}{% endblock %}
+
+{% block header %}
+    <ol class="breadcrumb navbar-breadcrumb">
+        <li>主机托管平台</li>
+        <li class="active">主机信息</li>
+    </ol>
+{% endblock %}
+{% block conter %}
+    <div id="yang" class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <el-form label-position="left" label-width="130px">
+                        <el-form-item label="选择查看平台:" style="margin-left: 26px;margin-top: 10px;margin-bottom: 10px;">
+                            <el-select v-model="pt" clearable placeholder="请选择"
+                                       style="width: 160px" @change="change_data" size="small">
+                                <el-option
+                                        v-for="item in options_pt"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-form>
+                    <div class="card-title">
+                        <div class="title">用户列表</div>
+                    </div>
+                </div>
+                <div class="card-body" v-loading="loading"
+                     style="min-height: 550px;"
+                     element-loading-text="拼命加载中"
+                     element-loading-spinner="el-icon-loading"
+                     element-loading-background="rgba(0, 0, 0, 0.8)">
+                    <div class="col-md-12">
+                        <el-table
+                                :data="data_page"
+                                border
+                                style="width: 100%">
+                            <el-table-column
+                                    prop="group_id__name"
+                                    label="所属项目"
+                                    width="150">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="ip"
+                                    label="ip地址"
+                                    width="150">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="disk_num"
+                                    label="磁盘数量"
+                                    width="120">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="disk_capacity"
+                                    label="磁盘总大小"
+                                    width="120">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="memory"
+                                    label="内存大小"
+                                    width="120">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="cpu_model"
+                                    label="cpu型号">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="cpu"
+                                    label="cpu盒数"
+                                    width="90">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="v_or_s"
+                                    label="类型"
+                                    width="90">
+                            </el-table-column>
+                        </el-table>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="block container" style="margin-top: 50px;">
+                            <el-pagination
+                                    @size-change="handleSizeChange"
+                                    @current-change="handleCurrentChange"
+                                    background
+                                    layout="prev, pager, next,jumper,total,sizes"
+                                    prev-text="上一页"
+                                    next-text="下一页"
+                                    popper-class="每页显示"
+                                    :current-page="list_data.currentPage"
+                                    :total="total"
+                                    :page-sizes="[10, 20, 50, 100]"
+                                    :page-size="list_data.handlesize">
+                            </el-pagination>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block js %}
+    <script>
+        $("#active3").addClass("active");
+        function page_ajax(ths) {
+            console.log("ok");
+            axios.post("/monitor/host/", ths.list_data, {
+                transformRequest: [
+                    function (data) {
+                        let params = '';
+                        for (let index in data) {
+                            params += index + "=" + data[index] + "&"
+                        }
+                        return params
+                    }
+                ]
+            }).then(function (resp) {
+                ths.options_pt = resp.data.pt;
+                ths.data_page = resp.data.data;
+                ths.total = resp.data.total;
+                ths.loading = false;
+            }).catch(function (resp) {
+                console.log("请求失败")
+            })
+        }
+        var yang = new Vue({
+            el: "#yang",
+            data: {
+                data_page: [],
+                user_edit: {},
+                pt: "",
+                options_pt: [],
+                list_data: {currentPage: 1, handlesize: 10},
+                total: 110,
+                loading: true,
+                editStatus: false,
+                error_message: "",
+                formLabelWidth: "100px"
+            },
+            methods: {
+                handleSizeChange(val) {
+                    this.list_data.handlesize = val;
+                    this.loading = true;
+                    console.log(`每页 ${val} 条` + this.currentPage);
+                    page_ajax(this)
+
+                },
+                handleCurrentChange(val) {
+                    this.loading = true;
+                    this.list_data.currentPage = val;
+                    console.log(`当前页: ${val} ` + this.handlesize);
+                    page_ajax(this);
+                },
+                change_data(){
+                    let dic = this.list_data;
+                    dic.pt = this.pt;
+                    axios.post("/monitor/host/", dic, {
+                        transformRequest: [
+                            function (data) {
+                                let params = '';
+                                for (let index in data) {
+                                    params += index + "=" + data[index] + "&"
+                                }
+                                return params
+                            }
+                        ]
+                    }).then(function (resp) {
+                        yang.options_pt = resp.data.pt;
+                        yang.data_page = resp.data.data;
+                        yang.total = resp.data.total;
+                        yang.loading = false;
+                    }).catch(function (resp) {
+                        console.log("请求失败")
+                    })
+                }
+            },
+            created: function (row) {
+                page_ajax(this)
+            }
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,381 @@
+{% extends 'template_html/index_base.html' %}
+
+{% block css %}
+    <style>
+        [v-cloak] {
+            display: none;
+        }
+    </style>
+{% endblock %}
+
+{% block header %}
+    <ol class="breadcrumb navbar-breadcrumb">
+        <li>主机托管平台</li>
+        <li class="active">任务下发</li>
+    </ol>
+{% endblock %}
+{% block conter %}
+    <div class="card">
+    <div class="card-body">
+        <div class="step">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+                <li role="step" class="active">
+                    <a href="#step1" id="step1-tab" role="tab" data-toggle="tab" aria-controls="home"
+                       aria-expanded="true">
+                        <div class="icon fa fa-user-plus"></div>
+                        <div class="step-title">
+                            <div class="title">账号创建与禁用</div>
+                            <div class="description">在平台推送新账号</div>
+                        </div>
+                    </a>
+                </li>
+                <li role="step" class="">
+                    <a href="#step2" role="tab" id="step2-tab" data-toggle="tab" aria-controls="profile"
+                       aria-expanded="false">
+                        <div class="icon fa fa-user"></div>
+                        <div class="step-title">
+                            <div class="title">账号修改</div>
+                            <div class="description">修改密码，或删除</div>
+                        </div>
+                    </a>
+                </li>
+                <li role="step" class="">
+                    <a href="#step3" role="tab" id="step3-tab" data-toggle="tab" aria-controls="profile"
+                       aria-expanded="false">
+                        <div class="icon fa fa-linux"></div>
+                        <div class="step-title">
+                            <div class="title">命令下发</div>
+                            <div class="description">下发自定义指令</div>
+                        </div>
+                    </a>
+                </li>
+            </ul>
+            <div class="tab-content row" id="yang">
+                <div role="tabpanel" class="tab-pane fade active in" id="step1" aria-labelledby="home-tab">
+                    <div class="col-md-8 col-md-offset-2">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <div class="title" style="color: #F56C6C;font-weight: bold">
+                                        <i class="el-icon-upload"></i> 推送账号
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <el-form label-position="left" label-width="200px">
+                                    <el-form-item label="请选择推送平台:">
+                                        <el-select v-model="pt1" multiple placeholder="请选择"
+                                                   style="width: 300px">
+                                            <el-option
+                                                    v-for="item in options_pt"
+                                                    :key="item.value"
+                                                    :label="item.label"
+                                                    :value="item.value">
+                                            </el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                    <el-form-item label="请选择操作账号:">
+                                        <el-select v-model="value1" clearable placeholder="请选择"
+                                                   style="width: 300px">
+                                            <el-option
+                                                    v-for="item in options"
+                                                    :key="item.value"
+                                                    :label="item.label"
+                                                    :value="item.value">
+                                                <span style="float: left" v-text="item.label"></span>
+                                                <span style="float: right; color: #8492a6; font-size: 13px"
+                                                      v-text="item.value"></span>
+                                            </el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                </el-form>
+                                <div class="col-md-12" style="height: 120px;"></div>
+                                <div class="col-md-2 col-md-offset-8" style="margin-bottom: 40px;">
+                                    <el-button type="primary" round v-text="bname" @click="submit_add"></el-button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {#                    分割 #}
+                <div role="tabpanel" class="tab-pane fade" id="step2" aria-labelledby="profile-tab">
+                    <div class="col-md-8 col-md-offset-2">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <div class="title" style="color: #F56C6C;font-weight: bold">
+                                        <i class="el-icon-document"></i> 账号操作
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <el-form label-position="left" label-width="200px">
+                                    <el-form-item label="请选择推送平台:">
+                                        <el-select v-model="pt2" multiple placeholder="请选择"
+                                                   style="width: 300px">
+                                            <el-option
+                                                    v-for="item in options_pt"
+                                                    :key="item.value"
+                                                    :label="item.label"
+                                                    :value="item.value">
+                                            </el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                    <el-form-item label="请选择操作账号:">
+                                        <el-select v-model="value2" clearable placeholder="请选择"
+                                                   style="width: 300px">
+                                            <el-option
+                                                    v-for="item in options2"
+                                                    :key="item.value"
+                                                    :label="item.label"
+                                                    :value="item.value">
+                                                <span style="float: left" v-text="item.label"></span>
+                                                <span style="float: right; color: #8492a6; font-size: 13px"
+                                                      v-text="item.value"></span>
+                                            </el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                </el-form>
+                                <div class="col-md-4">
+                                    <el-switch
+                                            style="display: block"
+                                            v-model="change_del"
+                                            active-color="#13ce66"
+                                            inactive-color="#ff4949"
+                                            active-text="删除操作"
+                                            inactive-text="密码修改">
+                                    </el-switch>
+                                </div>
+                                <div class="col-md-12" style="height: 120px;"></div>
+                                <div class="col-md-2 col-md-offset-8" style="margin-bottom: 40px;">
+                                    <el-button type="primary" round v-text="bname"
+                                               @click="submit_change"></el-button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {#                    分割 #}
+                <div role="tabpanel" class="tab-pane fade" id="step3" aria-labelledby="dropdown1-tab">
+                    <div class="col-md-8 col-md-offset-2">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <div class="title" style="color: #F56C6C;font-weight: bold">
+                                        <i class="el-icon-info"></i> 命令执行
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <el-form label-position="left" label-width="200px">
+                                    <el-form-item label="请输入执行命令:">
+                                        <el-input
+                                                placeholder="请输入内容"
+                                                v-model="value3"
+                                                clearable style="width: 300px;">
+                                        </el-input>
+                                    </el-form-item>
+                                    <el-form-item label="请选择推送平台:">
+                                        <el-select v-model="pt3" clearable placeholder="请选择"
+                                                   style="width: 300px">
+                                            <el-option
+                                                    v-for="item in options_pt"
+                                                    :key="item.value"
+                                                    :label="item.label"
+                                                    :value="item.value">
+                                            </el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                </el-form>
+
+                                <div class="col-md-12" id="checkbox">
+                                    <transition-group enter-active-class="animated bounceIn"
+                                                      leave-active-class="animated fadeOutLeft">
+                                        <div class="checkbox3 checkbox-inline checkbox-success checkbox-check checkbox-light col-md-2"
+                                             v-for="ip,k in ip_list" :key="k">
+                                            <input type="checkbox" :id="ip">
+                                            <label :for="ip" v-text="ip">
+                                            </label>
+
+                                        </div>
+                                    </transition-group>
+
+                                </div>
+
+                                <div class="col-md-12" style="height: 120px;">
+                                    <p v-text="msg2"></p>
+                                </div>
+                                <div class="col-md-2 col-md-offset-8" style="margin-bottom: 40px;">
+                                    <el-button type="primary" round v-text="bname"
+                                               @click="ip"></el-button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block js %}
+    <script>
+        function page_ajax(ths, dic) {
+            axios.post("/monitor/command/", dic, {
+                transformRequest: [
+                    function (data) {
+                        let params = '';
+                        for (let index in data) {
+                            params += index + "=" + data[index] + "&"
+                        }
+                        return params
+                    }
+                ]
+            }).then(function (resp) {
+                if (resp.data.status === "true") {
+                    yang.$notify({
+                        title: '成功',
+                        type: 'success',
+                        message: "任务添加成功",
+                        offset: 100
+                    });
+                } else {
+                    yang.$notify({
+                        title: '失败',
+                        type: 'error',
+                        message: "没有此任务的权限,请联系管理员",
+                        offset: 100
+                    });
+                }
+
+            }).catch(function (resp) {
+                console.log("请求失败")
+            })
+        }
+        $("#active3").addClass("active");
+        var yang = new Vue({
+            el: "#yang",
+            data: {
+                options: [],
+                options2: [{value: "root", label: "ROOT"}],
+                options_pt: [],
+                value1: "",
+                value2: "",
+                value3: "",
+                pt1: [],
+                pt2: [],
+                pt3: "",
+                ip_list: [],
+                ip_dic: {},
+                bname: "开始推送任务",
+                change_del: false
+            },
+            methods: {
+                submit_add(){
+                    if ((this.value1 !== "" && this.pt1.length !== 0)) {
+                        page_ajax(this, {"value": yang.value1, "status": "myadd", "pt": yang.pt1});
+                        yang.value1 = "";
+                        yang.pt1 = []
+                    } else {
+                        const h = this.$createElement;
+                        yang.$notify({
+                            title: '错误',
+                            type: 'warning',
+                            message: h('i', {style: 'color: red'}, '所有选项都不能为空'),
+                            offset: 100
+                        });
+                    }
+                },
+                submit_change(){
+                    if (this.change_del === true && this.value2 === "root") {
+                        const h = this.$createElement;
+                        yang.$notify({
+                            title: '错误',
+                            type: 'warning',
+                            message: h('i', {style: 'color: red'}, '不能删除root用户,请注意!!!'),
+                            offset: 100
+                        });
+                        return
+                    }
+                    if ((this.value2 !== "" && this.pt2.length !== 0)) {
+                        let result2 = "";
+                        if (yang.change_del === false) {
+                            let result2 = page_ajax(this, {"value": yang.value2, "status": "mychange", "pt": yang.pt2});
+                        } else {
+                            let result2 = page_ajax(this, {"value": yang.value2, "status": "mydel", "pt": yang.pt2});
+                        }
+                        yang.value2 = "";
+                        yang.pt2 = []
+                    } else {
+                        const h = this.$createElement;
+                        yang.$notify({
+                            title: '错误',
+                            type: 'warning',
+                            message: h('i', {style: 'color: red'}, '所有选项都不能为空'),
+                            offset: 100
+                        });
+                    }
+                },
+                ip(){
+                    let iplist = $("input:checked");
+                    let ipstr = "";
+                    $.each(iplist, function (key, value) {
+                        ipstr += value.id + ","
+                    });
+                    if ((this.value3 !== "" && this.pt3.length !== 0)) {
+                        let status = page_ajax(this, {
+                            "value": yang.value3,
+                            "ipstr": ipstr,
+                            "pt": yang.pt3,
+                            status: "cmd"
+                        });
+                        yang.value3 = "";
+                        yang.pt3 = ""
+                    } else {
+                        const h = this.$createElement;
+                        yang.$notify({
+                            title: '错误',
+                            type: 'warning',
+                            message: h('i', {style: 'color: red'}, '所有选项都不能为空'),
+                            offset: 100
+                        });
+                    }
+                }
+
+            },
+            computed: {
+                msg2: function () {
+                    if (this.pt3 === "ALL") {
+                        yang.ip_list = [];
+                        return ""
+                    }
+                    axios.get("/monitor/command/", {
+                        params: {
+                            status: "host_list",
+                            group: this.pt3
+                        }
+                    }).then(function (resp) {
+                        yang.ip_list = resp.data.data;
+
+
+                    })
+                }
+            },
+            mounted: function () {
+                axios.get("/monitor/command/", {
+                    params: {
+                        status: "GET"
+                    }
+                }).then(function (resp) {
+                    yang.options = resp.data.data;
+                    yang.options2.push.apply(yang.options2, resp.data.change_list);
+                    yang.options_pt = resp.data.pt;
+
+                })
+            }
+        })
+    </script>
+{% endblock %}
