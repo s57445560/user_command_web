@@ -107,6 +107,10 @@
 ![image](https://github.com/s57445560/img-all/raw/master/user_command/command1.png)
 
 
+#### 主机信息
+
+![image](https://github.com/s57445560/img-all/raw/master/user_command/host.png)
+
 #### admin后台groups管理与权限控制
 
 ![image](https://github.com/s57445560/img-all/raw/master/user_command/admin_groups.png)
