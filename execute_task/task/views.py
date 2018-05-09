@@ -78,10 +78,14 @@ class Get_taskid_all(View):
     @auth.apiauth
     def post(self, request):
         name = request.POST.get("name")
+        proxy_ip_list = request.POST.get("proxy_ip").split(",")
+        print(proxy_ip_list)
         group_obj = models.Groups.objects.filter(name=name).first()
         if group_obj:
             for ip in request.POST:
                 if ip == "name":
+                    continue
+                if ip == "proxy_ip":
                     continue
                 if request.POST.get(ip) != "":
                     host_dic = {}
@@ -94,6 +98,11 @@ class Get_taskid_all(View):
                     host_dic["cpu"] = host_info_list[3]
                     host_dic["cpu_model"] = host_info_list[4]
                     host_dic["v_or_s"] = host_info_list[5]
+                    if ip in proxy_ip_list:
+                        host_dic["proxy_or_client"] = "proxy"
+                    else:
+                        host_dic["proxy_or_client"] = "agent"
+
                     print_logs.info("%s : 成功上报主机 %s" % (name, ip))
                     host_obj = models.Hosts.objects.filter(ip=ip, group_id_id=group_obj.id)
                     if host_obj:
@@ -102,6 +111,13 @@ class Get_taskid_all(View):
                     else:
                         print("创建")
                         models.Hosts.objects.create(ip=ip, group_id_id=group_obj.id, **host_dic)
+                else:
+                    host_obj = models.Hosts.objects.filter(ip=ip, group_id_id=group_obj.id)
+                    if host_obj:
+                        print("为空并且存在")
+                    else:
+                        print("为空不存在")
+                        models.Hosts.objects.create(ip=ip,group_id_id=group_obj.id)
 
         else:
             print_logs.error("%s 不在企业鉴权表内,无法添加数据" % name)
@@ -484,11 +500,13 @@ class Host_info(View):
                                                                                                              'cpu',
                                                                                                              'cpu_model',
                                                                                                              'disk_capacity',
-                                                                                                             'disk_num')
+                                                                                                             'disk_num',
+                                                                                                             'proxy_or_client')
             else:
                 host_objs = models.Hosts.objects.get_queryset().order_by('id').values('ip', 'memory', 'group_id__name',
                                                                                       'v_or_s', 'cpu', 'cpu_model',
-                                                                                      'disk_capacity', 'disk_num')
+                                                                                      'disk_capacity', 'disk_num',
+                                                                                      'proxy_or_client')
             total = int(len(host_objs))
             paginator = Paginator(host_objs, handlesize)  # 每页显示2个 并且把数据传入进来
             try:

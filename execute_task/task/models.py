@@ -20,6 +20,7 @@ class Hosts(models.Model):
     cpu_model = models.CharField(max_length=32,null=True,verbose_name="cpu型号")
     cpu = models.CharField(max_length=32,verbose_name="cpu盒数")
     v_or_s = models.CharField(max_length=32,null=True,verbose_name="主机类型")
+    proxy_or_client = models.CharField(max_length=32,null=True,verbose_name="服务器类型")
 
 
 class Task(models.Model):

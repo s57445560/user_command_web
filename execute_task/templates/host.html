@@ -43,22 +43,27 @@
                             <el-table-column
                                     prop="group_id__name"
                                     label="所属项目"
-                                    width="150">
+                                    width="110">
+                                <template slot-scope="scope">
+                                    <el-tag
+                                            type="success"
+                                            disable-transitions v-text="scope.row.group_id__name"></el-tag>
+                                </template>
                             </el-table-column>
                             <el-table-column
                                     prop="ip"
                                     label="ip地址"
-                                    width="150">
+                                    width="130">
                             </el-table-column>
                             <el-table-column
                                     prop="disk_num"
                                     label="磁盘数量"
-                                    width="120">
+                                    width="90">
                             </el-table-column>
                             <el-table-column
                                     prop="disk_capacity"
                                     label="磁盘总大小"
-                                    width="120">
+                                    width="100">
                             </el-table-column>
                             <el-table-column
                                     prop="memory"
@@ -76,8 +81,18 @@
                             </el-table-column>
                             <el-table-column
                                     prop="v_or_s"
-                                    label="类型"
+                                    label="主机类型"
                                     width="90">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="proxy_or_client"
+                                    label="客户端"
+                                    width="90">
+                                <template slot-scope="scope">
+                                    <el-tag
+                                            :type="scope.row.proxy_or_client === 'proxy' ? 'danger' : 'success'"
+                                            disable-transitions v-text="scope.row.proxy_or_client"></el-tag>
+                                </template>
                             </el-table-column>
                         </el-table>
                     </div>
