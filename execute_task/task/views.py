@@ -117,7 +117,7 @@ class Get_taskid_all(View):
                         print("为空并且存在")
                     else:
                         print("为空不存在")
-                        models.Hosts.objects.create(ip=ip,group_id_id=group_obj.id)
+                        models.Hosts.objects.create(ip=ip, group_id_id=group_obj.id)
 
         else:
             print_logs.error("%s 不在企业鉴权表内,无法添加数据" % name)
@@ -158,13 +158,14 @@ class Get_put_task(View):
         task_list = []
         task_dict = {}
         print(request.method)
-        task_objs = models.Task.objects.filter(time__gt=timezone.now() + datetime.timedelta(minutes=-180))
+        task_objs = models.Task.objects.filter(time__gt=timezone.now() + datetime.timedelta(minutes=-30))
         # 生成api的数据格式 [{task...},{task...}]
         for task in task_objs:
             task_dict["groups"] = task.task_group.split(',')
             task_dict["cmd"] = task.cmd
             task_dict["status_user"] = task.status_user
             task_dict["login"] = task.login
+            task_dict["sudo"] = task.sudo
             task_dict["user"] = task.user
             task_dict["passwd"] = task.passwd
             if task.hosts == None:
@@ -325,6 +326,12 @@ class Command(View):
                 obj_dic["login"] = True
             else:
                 obj_dic["login"] = False
+
+            if obj.sudo_status == "可用":
+                obj_dic["sudo"] = True
+            else:
+                obj_dic["sudo"] = False
+
             if "ALL" in pt_list:
                 models.Task.objects.create(task_group="ALL", cmd="myadd", status_user=True, **obj_dic)
             else:
@@ -370,15 +377,27 @@ class User(View):
         username = request.POST.get("username")
         passwd = request.POST.get("passwd")
         status = request.POST.get("status")
+        sudo_status = request.POST.get("sudo_status")
 
         message = check_form(request.POST, models.User, my_form.USER)
         print(message)
         if message == "":
             print(status, "aacccc")
             if status == "true":
-                models.User.objects.create(username=username, passwd=passwd, status="可用", name=name, push_status="未推送")
+                if sudo_status == "true":
+                    models.User.objects.create(username=username, passwd=passwd, status="可用", name=name,
+                                               push_status="未推送", sudo_status="可用")
+                else:
+                    models.User.objects.create(username=username, passwd=passwd, status="可用", name=name,
+                                               push_status="未推送", sudo_status="禁用")
             else:
-                models.User.objects.create(username=username, passwd=passwd, status="停用", name=name, push_status="未推送")
+                if sudo_status == "true":
+                    models.User.objects.create(username=username, passwd=passwd, status="停用", name=name,
+                                               push_status="未推送", sudo_status="可用")
+                else:
+                    models.User.objects.create(username=username, passwd=passwd, status="停用", name=name,
+                                               push_status="未推送", sudo_status="禁用")
+
         return HttpResponse(json.dumps({"message": message}))
 
 
@@ -429,24 +448,42 @@ class User_edit(View):
         passwd = request.POST.get("passwd")
         status = request.POST.get("status")
         push_status = request.POST.get("push_status")
+        sudo_status = request.POST.get("sudo_status")
         id = request.POST.get("id")
-        dic = {'可用': "true", "停用": "false"}
-        print(id, username, passwd, status,push_status)
+        dic = {'可用': "true", "停用": "false", "禁用": "false"}
+        print(id, username, passwd, status, push_status)
         user_obj = models.User.objects.filter(id=id).first()
         # 如果都相等证明没有变化 直接返回。
-        if user_obj.passwd == passwd and dic[user_obj.status] == status:
-            return HttpResponse(json.dumps({"message": "", "status": user_obj.status, "passwd": passwd,"push_status": push_status}))
+        if user_obj.passwd == passwd and dic[user_obj.status] == status and dic[user_obj.sudo_status] == sudo_status:
+            return HttpResponse(
+                json.dumps({"message": "", "status": user_obj.status, "passwd": passwd, "push_status": push_status,
+                            "sudo_status": user_obj.sudo_status}))
         message = check_form(request.POST, models.User, my_form.USER, not_edit_field=["username", "name"])
         print(message)
         if message == "":
             if status == "true":
-                models.User.objects.filter(id=id).update(passwd=passwd, status="可用", push_status="未推送")
+                if sudo_status == "true":
+                    models.User.objects.filter(id=id).update(passwd=passwd, status="可用", push_status="未推送",
+                                                             sudo_status="可用")
+                    sudo_status = "可用"
+                else:
+                    models.User.objects.filter(id=id).update(passwd=passwd, status="可用", push_status="未推送",
+                                                             sudo_status="禁用")
+                    sudo_status = "禁用"
                 status = "可用"
             else:
-                models.User.objects.filter(id=id).update(passwd=passwd, status="停用", push_status="未推送")
+                if sudo_status == "true":
+                    models.User.objects.filter(id=id).update(passwd=passwd, status="停用", push_status="未推送",
+                                                             sudo_status="可用")
+                    sudo_status = "可用"
+                else:
+                    models.User.objects.filter(id=id).update(passwd=passwd, status="可用", push_status="未推送",
+                                                             sudo_status="禁用")
+                    sudo_status = "禁用"
                 status = "停用"
         passwd = passwd
-        return HttpResponse(json.dumps({"message": message, "status": status, "passwd": passwd, "push_status": "未推送"}))
+        return HttpResponse(json.dumps(
+            {"message": message, "status": status, "passwd": passwd, "push_status": "未推送", "sudo_status": sudo_status}))
 
 
 # 用户删除

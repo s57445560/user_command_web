@@ -24,7 +24,8 @@ class Monitor(object):
             user = task_dic.get("user")
             passwd = task_dic.get("passwd")
             login = task_dic.get("login")
-            fabric_obj = run_fabric.Fabric_run(user_passwd=[user, passwd, login])
+            sudo = task_dic.get("sudo")
+            fabric_obj = run_fabric.Fabric_run(user_passwd=[user, passwd, login,sudo])
             # 判断是否有此方法，如果没有则是非法指令
             if hasattr(fabric_obj,cmd):
                 return fabric_obj.running(getattr(fabric_obj,cmd),hosts)

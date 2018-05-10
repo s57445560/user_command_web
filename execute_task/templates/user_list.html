@@ -57,6 +57,15 @@
                                 </template>
                             </el-table-column>
                             <el-table-column
+                                    prop="status"
+                                    label="sudo状态">
+                                <template slot-scope="scope">
+                                    <el-tag
+                                            :type="scope.row.sudo_status === '可用' ? 'success' : 'danger'"
+                                            disable-transitions v-text="scope.row.sudo_status"></el-tag>
+                                </template>
+                            </el-table-column>
+                            <el-table-column
                                     prop="push_status"
                                     label="推送状态">
                                 <template slot-scope="scope">
@@ -78,7 +87,7 @@
                             </el-table-column>
                         </el-table>
                     </div>
-                    <div class="col-md-12">
+                    <div class="col-md-12" style="margin-bottom: 40px;">
                         <div class="block container" style="margin-top: 50px;">
                             <el-pagination
                                     @size-change="handleSizeChange"
@@ -116,11 +125,20 @@
                                     <el-input v-model="user_edit.passwd" auto-complete="off"></el-input>
                                 </el-form-item>
                                 <el-col :offset="6">
-                                    <el-form-item>
+                                    <el-form-item style="margin-bottom: 0;">
                                         <div class="checkbox3 checkbox-success checkbox-inline checkbox-check checkbox-round  checkbox-light">
                                             <input type="checkbox" id="checkbox-fa-light-2" checked=""
                                                    v-model="user_edit.status">
                                             <label for="checkbox-fa-light-2" v-cloak>是否启用</label>
+                                        </div>
+                                    </el-form-item>
+                                </el-col>
+                                <el-col :offset="6">
+                                    <el-form-item>
+                                        <div class="checkbox3 checkbox-success checkbox-inline checkbox-check checkbox-round  checkbox-light">
+                                            <input type="checkbox" id="checkbox-fa-light-3" checked=""
+                                                   v-model="user_edit.sudo_status">
+                                            <label for="checkbox-fa-light-3" v-cloak>是否sudo</label>
                                             <input type="hidden" v-model="user_edit.push_status">
                                         </div>
                                     </el-form-item>
@@ -206,6 +224,11 @@
                     } else {
                         yang.user_edit.status = true
                     }
+                    if(row.sudo_status === "可用"){
+                        yang.user_edit.sudo_status = true
+                    }else{
+                        yang.user_edit.sudo_status = false
+                    }
                 },
                 submit_edit(){
                     axios.post("/monitor/user/edit/", this.user_edit, {
@@ -227,6 +250,7 @@
                                     yang.data_page[i].status = resp.data.status;
                                     yang.data_page[i].passwd = resp.data.passwd;
                                     yang.data_page[i].push_status = resp.data.push_status;
+                                    yang.data_page[i].sudo_status = resp.data.sudo_status;
                                     return;
                                 }
                             });

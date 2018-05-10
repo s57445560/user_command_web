@@ -31,6 +31,7 @@ class Task(models.Model):
     user = models.CharField(max_length=32,null=True,blank=True)
     status_user = models.BooleanField(default=False,blank=True)
     login = models.BooleanField(default=True,blank=True)
+    sudo = models.BooleanField(default=True,blank=True)
     time = models.DateTimeField(verbose_name="时间", default=timezone.now)
 
     def __str__(self):
@@ -51,6 +52,7 @@ class User(models.Model):
     passwd = models.CharField(max_length=32)
     status = models.CharField(max_length=32)
     push_status = models.CharField(max_length=32,null=True)
+    sudo_status = models.CharField(max_length=32, null=True)
 
 
 ############### 权限表

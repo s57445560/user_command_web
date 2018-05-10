@@ -75,14 +75,26 @@ class Fabric_run(object):
                     if result == "error":
                         if self.user_passwd[2] == False:
                             run("usermod -L {username}".format(username=self.user_passwd[0]))
-                            return "ok"
+                            return "ok disable"
                         elif self.user_passwd[2] == True:
                             run("usermod -U {username}".format(username=self.user_passwd[0]))
-                            return "ok"
+
+                        if self.user_passwd[3] == True:
+                            sudo = run('cat /etc/sudoers|grep "{username} " >/dev/null &&echo "ok"||echo "{username} ALL=(ALL) NOPASSWD: ALL" >>/etc/sudoers'.format(
+                                    username=self.user_passwd[0]))
+                            if sudo == "ok":
+                                return "error %s user exist" % self.user_passwd[0]
+                            return "ok enable sudo"
+                        elif self.user_passwd[3] == False:
+                            run("sed -i 's/^{username} .*//g' /etc/sudoers".format(username=self.user_passwd[0]))
+                            return "ok disable sudo"
                         return "error %s user exist" % self.user_passwd[0]
+
                     run('echo "{passwd}" | sudo passwd {username} --stdin  >/dev/null'.format(
                         username=self.user_passwd[0], passwd=self.user_passwd[1]))
-                    run('echo "{username} ALL=(ALL) NOPASSWD: ALL" >>/etc/sudoers'.format(username=self.user_passwd[0]))
+                    if self.user_passwd[3] == True:
+                        run('echo "{username} ALL=(ALL) NOPASSWD: ALL" >>/etc/sudoers'.format(
+                            username=self.user_passwd[0]))
                     return "ok"
             except:
                 return "Failure to execute"
