@@ -98,7 +98,7 @@ class Get_taskid_all(View):
                     host_dic["cpu"] = host_info_list[3]
                     host_dic["cpu_model"] = host_info_list[4]
                     host_dic["v_or_s"] = host_info_list[5]
-                    if ip in proxy_ip_list:
+                    if ip.split(":")[0] in proxy_ip_list:
                         host_dic["proxy_or_client"] = "proxy"
                     else:
                         host_dic["proxy_or_client"] = "agent"
