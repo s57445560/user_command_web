@@ -29,8 +29,8 @@ class Fabric_run(object):
         with settings(abort_on_prompts=True):
             try:
                 with hide('running', 'stdout', 'stderr'):
-                    disk_k = run("fdisk -l 2>/dev/null|grep 'Disk /dev/s' 2>/dev/null|awk '{a+=$3}END{print a}'")
-                    disk_num = run("fdisk -l 2>/dev/null|grep 'Disk /dev/s' 2>/dev/null|wc -l")
+                    disk_k = run("fdisk -l 2>/dev/null|egrep 'Disk /dev/[svx]' 2>/dev/null|awk '{a+=$3}END{print a}'")
+                    disk_num = run("fdisk -l 2>/dev/null|egrep 'Disk /dev/[svx]' 2>/dev/null|wc -l")
                     mem = run("free -g|awk 'NR==2{print $2}'")
                     cpu_num = run('cat /proc/cpuinfo |grep "processor"|wc -l')
                     cpu_model = run("cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq -c|grep -Po '(?<=[0-9]).*' ")

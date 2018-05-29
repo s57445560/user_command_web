@@ -1,0 +1,2 @@
+export CMDLOG_FILE="/var/log/command.log"
+readonly PROMPT_COMMAND='{ date "+%y-%m-%d %T ##### $(who am i |awk "{print \$1\" \"\$2\" \"\$5}") #### $(pwd) #### $(history 1 | { read x cmd; echo "$cmd"; })"; } >> $CMDLOG_FILE'
