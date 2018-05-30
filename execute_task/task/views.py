@@ -544,7 +544,7 @@ class Host_info(View):
                                                                                       'v_or_s', 'cpu', 'cpu_model',
                                                                                       'disk_capacity', 'disk_num',
                                                                                       'proxy_or_client')
-            total = int(len(host_objs))
+            total = host_objs.count()
             paginator = Paginator(host_objs, handlesize)  # 每页显示2个 并且把数据传入进来
             try:
                 contacts = paginator.page(currentPage)  # 判断有没有page数值
@@ -608,17 +608,10 @@ class Task_info(View):
                     dic["color"] = "success"
                 else:
                     dic["color"] = "primary"
-                ok = 0
-                err = 0
                 all = 0
-                for obj in models.Task_result.objects.filter(task_id_id=dic["id"]):
-                    if obj.task_status:
-                        ok += 1
-                    else:
-                        err += 1
-                dic["ok"] = ok
-                dic["err"] = err
-                print(dic["hosts"])
+                result_task = models.Task_result.objects.filter(task_id_id=dic["id"])
+                dic["ok"] = result_task.filter(task_status=1).count()
+                dic["err"] = result_task.filter(task_status=0).count()
                 if dic["hosts"] == "" or dic["hosts"] == None:
                     if dic["task_group"] == "ALL":
                         print("aaaaaa")
