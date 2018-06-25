@@ -16,6 +16,7 @@ class Fabric_run(object):
         env.user = 'root'
         env.passwords = ip_dic
 
+    @parallel(pool_size=20)
     def run_command(self):
         with settings(abort_on_prompts=True):
             try:
@@ -44,12 +45,14 @@ class Fabric_run(object):
                 return ""
 
     # 密码修改
+    @parallel(pool_size=20)
     def mychange(self):
         result = run('echo "{passwd}" | sudo passwd {username} --stdin  >/dev/null&&echo "ok"||echo "error"'.format(
             username=self.user_passwd[0], passwd=self.user_passwd[1]))
         return result
 
     # 删除账号
+    @parallel(pool_size=20)
     def mydel(self):
         if self.user_passwd[0].strip() == "root":
             return "error root not del"
@@ -65,6 +68,7 @@ class Fabric_run(object):
                 return "Failure to execute"
 
     # 账号添加与禁用
+    @parallel(pool_size=20)
     def myadd(self):
         if self.user_passwd[0].strip() == "root":
             return "error root not add or nologin"
