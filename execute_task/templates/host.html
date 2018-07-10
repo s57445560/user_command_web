@@ -11,7 +11,11 @@
 {% block conter %}
     <div id="yang" class="row">
         <div class="col-md-12">
-            <div class="card">
+            <div class="card" v-loading="loading"
+                     style="min-height: 550px;"
+                     element-loading-text="拼命加载中"
+                     element-loading-spinner="el-icon-loading"
+                     element-loading-background="rgba(0, 0, 0, 0.8)">
                 <div class="card-header">
                     <el-form label-position="left" label-width="130px">
                         <el-form-item label="选择查看平台:" style="margin-left: 26px;margin-top: 10px;margin-bottom: 10px;">
@@ -27,14 +31,10 @@
                         </el-form-item>
                     </el-form>
                     <div class="card-title">
-                        <div class="title">用户列表</div>
+                        <div class="title">主机列表</div>
                     </div>
                 </div>
-                <div class="card-body" v-loading="loading"
-                     style="min-height: 550px;"
-                     element-loading-text="拼命加载中"
-                     element-loading-spinner="el-icon-loading"
-                     element-loading-background="rgba(0, 0, 0, 0.8)">
+                <div class="card-body">
                     <div class="col-md-12">
                         <el-table
                                 :data="data_page"

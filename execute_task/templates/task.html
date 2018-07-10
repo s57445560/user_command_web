@@ -11,17 +11,17 @@
 {% block conter %}
     <div id="yang" class="row">
         <div class="col-md-12">
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">
-                        <div class="title">用户列表</div>
-                    </div>
-                </div>
-                <div class="card-body" v-loading="loading"
+            <div class="card" v-loading="loading"
                      style="min-height: 550px;"
                      element-loading-text="拼命加载中"
                      element-loading-spinner="el-icon-loading"
                      element-loading-background="rgba(0, 0, 0, 0.8)">
+                <div class="card-header">
+                    <div class="card-title">
+                        <div class="title">任务列表</div>
+                    </div>
+                </div>
+                <div class="card-body">
                     <div class="col-md-12">
                         <el-table
                                 :data="data_page"
