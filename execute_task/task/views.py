@@ -182,6 +182,9 @@ class Get_put_task(View):
         p = re.compile(r"Failure to execute|^error")
         # 任务执行完毕后会把结果发送到此处
         group_name = request.POST.get("name")
+        group_obj = models.Groups.objects.filter(name=group_name).first()
+        if not group_obj:
+            return HttpResponse(json.dumps({"status": False}))
         print_logs.info("result data info: %s" % request.POST)
         id = request.POST.get("id")
         for ip in request.POST:
